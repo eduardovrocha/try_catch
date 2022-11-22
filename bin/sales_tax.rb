@@ -2,49 +2,56 @@ require 'byebug'
 
 def calculate
   input_block_count = 0
+  sales_taxes = 0
+  total = 0
 
   inspect_line = -> (line) {
-    line_split = line.split(',')
-    if line_split.size > 0
 
-      if line.include?('-Input:')
-        input_block_count += 1
-      else
+    if line.empty?
+      calculate_total {{ sales_taxes: sales_taxes, total: total }}
 
-        item_qtd = line_split[0].strip
-        item_value = line_split[2].strip.to_f
+    elsif (line.include?('-Input:'))
+      input_block_count += 1
+      puts "\nOutput: #{input_block_count}"
 
-        ge = goods_except.split(' ').map { |except_item|
-          item_value = item_value + calculate_tax(line_split[2], 'exempt') if apply_taxes(line_split[1]) { except_item }
-        }
+    else
+      line_split = line.split(',')
+      item_qtd = line_split[0].strip
+      item_value = line_split[2].strip.to_f
 
-        ii = imported_items.split(' ').map { |imported_item|
-          item_value = item_value + calculate_tax(line_split[2], 'imported') if apply_taxes(line_split[1]) { imported_item }
-        }
+      ge = goods_except.split(' ').map { |except_item|
+        calculate_tax(line_split[2], 'exempt') if apply_taxes(line_split[1]) { except_item }
+      }
+      ii = imported_items.split(' ').map { |imported_item|
+        calculate_tax(line_split[2], 'imported') if apply_taxes(line_split[1]) { imported_item }
+      }
 
-        taxes = [ge.compact!, ii.compact!]
-        puts "#{line_split[1]} - #{line_split[2]} -- #{taxes}"
+      basic_taxes = -> (item_value) {
+        return [].push((item_value/100)*10) if (ge.compact.empty? && ii.compact!.nil?)
+      }
 
+      taxes = [ge.compact!, ii, basic_taxes.call(item_value)]
 
-        format_output = -> () {
-          # puts "#{line_split[0]}, #{line_split[1]}, #{item_value.round(2)} - #{(item_value * line_split[0].to_i).round(2)}"
-        }
-
-        calculate_total(item_value, item_qtd) { |item, qtd| format_output }
-
-      end
+      # byebug
+      puts "#{item_qtd} #{line_split[1]} -  -- #{taxes}"
     end
   }
 
   File.foreach("bin/inputs.txt") { |line| inspect_line.call(line[0...-1]) }
+  puts ""
 end
 
-def calculate_total item_value, qtd
+def calculate_total
+
   yield
+
+  puts "Sales Taxes: 7.90"
+  puts "Total: 7.90"
+
 end
 
 def calculate_tax item_value, origin
-  (item_value.to_f / 100) * goods_rate[origin.to_sym]
+  ((item_value.strip.to_f/100)*goods_rate[origin.to_sym]).round(2)
 end
 
 def goods_rate
