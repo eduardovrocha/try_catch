@@ -1,3 +1,3 @@
-ruby bin/sales_tax.rb
+run the script: ruby bin/sales_tax.rb
 
-bundle exec rake spec
+run the rspec: bundle exec rake spec

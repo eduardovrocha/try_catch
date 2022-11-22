@@ -1,18 +1,14 @@
 require 'spec_helper'
-require_relative '../../bin/sales_tax'
+require 'byebug'
+# require_relative '../../bin/sales'
 
-describe 'sales_tax' do
+describe 'sales' do
 
-  it 'should total for exempt items' do
-
+  it 'calculate tax by value and description' do
+    
   end
 
-  it 'should total for normal items' do
-
-  end
-
-  it 'should total for imported items' do
-
+  it 'calculate amount tax on each Input block' do
   end
 
 end
