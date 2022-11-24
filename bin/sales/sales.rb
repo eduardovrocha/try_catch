@@ -1,3 +1,5 @@
+require 'byebug'
+
 def calculate
   @goods_rates = { imported: 5, exempt: 0, others: 10 }
   @options = { sales_taxes: 0, total: 0, block_count: 0 }
@@ -26,6 +28,7 @@ def read_input line
       line_split = line.split(', ')
       process_item = -> (item) {
         @options[:total] += get_result.call(item)
+
         puts "#{item[0]} #{item[1]}: #{get_result.call(item)}"
       }
 
